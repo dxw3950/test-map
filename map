@@ -1,1 +1,98 @@
+using System;
+using System.Collections.Generic;
+
+public class MapNode
+{
+    public int Row { get; set; }
+    public int Column { get; set; }
+    public List<MapNode> Connections { get; set; }
+
+    public MapNode(int row, int column)
+    {
+        Row = row;
+        Column = column;
+        Connections = new List<MapNode>();
+    }
+}
+
+public class MapGenerator
+{
+    private int rows;
+    private int columns;
+    private Random random;
+
+    public MapGenerator(int rows, int columns)
+    {
+        this.rows = rows;
+        this.columns = columns;
+        random = new Random();
+    }
+
+    public List<List<MapNode>> GenerateMap()
+    {
+        List<List<MapNode>> map = new List<List<MapNode>>();
+
+        // Generate nodes for each row
+        for (int row = 0; row < rows; row++)
+        {
+            List<MapNode> rowNodes = new List<MapNode>();
+            int nodesInRow = random.Next(2, columns + 1);
+
+            for (int col = 0; col < nodesInRow; col++)
+            {
+                rowNodes.Add(new MapNode(row, col));
+            }
+
+            map.Add(rowNodes);
+        }
+
+        // Connect nodes between rows
+        for (int row = 0; row < rows - 1; row++)
+        {
+            List<MapNode> currentRow = map[row];
+            List<MapNode> nextRow = map[row + 1];
+
+            foreach (MapNode node in currentRow)
+            {
+                int connections = random.Next(1, Math.Min(3, nextRow.Count + 1));
+                for (int i = 0; i < connections; i++)
+                {
+                    MapNode nextNode = nextRow[random.Next(nextRow.Count)];
+                    if (!node.Connections.Contains(nextNode))
+                    {
+                        node.Connections.Add(nextNode);
+                    }
+                }
+            }
+        }
+
+        return map;
+    }
+
+    public void PrintMap(List<List<MapNode>> map)
+    {
+        foreach (var row in map)
+        {
+            foreach (var node in row)
+            {
+                Console.Write($"({node.Row},{node.Column}) -> ");
+                foreach (var connection in node.Connections)
+                {
+                    Console.Write($"({connection.Row},{connection.Column}) ");
+                }
+                Console.WriteLine();
+            }
+        }
+    }
+}
+
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        MapGenerator generator = new MapGenerator(5, 4);
+        var map = generator.GenerateMap();
+        generator.PrintMap(map);
+    }
+}
 
